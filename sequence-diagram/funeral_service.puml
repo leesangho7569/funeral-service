@@ -1,0 +1,126 @@
+@startuml
+'장묘 sequence flow
+
+hide footbox
+
+actor "웹앱" as app
+
+box "PCP 서버" #LightSteelBlue
+Participant "user" as user_svc
+Participant "funeral" as fun_svc
+Participant "noti" as noti
+end box
+
+participant "KOS" as kos
+participant "상조사" as sangjo
+
+queue "RabbitMq" as rb
+
+database "DB" as db
+
+
+autonumber
+
+
+== 장묘 예약 ==
+
+app -> fun_svc : 장묘 예약 상담 신청 \n/funeral/v1/customer/funeral/outbound-request
+note over app
+uid = 1234 
+{ //비대칭 암호화
+ "customer_name":"홀길동",
+ "mobile":"01012341234",
+ "translated_certificate_no":"trans1234",
+ "vehicle_svc_support":"false",
+ "funeral_place":"장묘지"
+}
+end note
+
+fun_svc -> fun_svc
+
+alt  상담 요청 처음 or 기존 상담 요청 : table 에 uid/translated_certificate_no가 있거나 no-data 경우
+  fun_svc -> sangjo : 상조사 API
+  note over fun_svc
+  { 
+    "customer_name":"홀길동",
+    "mobile":"01012341234",
+    "translated_certificate_no":"증서번호",
+    "uid":"유저식별자",
+    "vehicle_svc_support":"false",
+    "funeral_place":"장묘지"
+  }
+  end note
+  fun_svc -> rb : event
+  
+  fun_svc <-- sangjo : 응답
+  alt 
+  fun_svc -> db : 상조사로 부터 성공 응답인 경우 저장, 상태 저장 : 1(상담신청)
+  end
+  fun_svc -> rb : event
+  app <-- fun_svc : 응답
+
+else table 에 uid / translated_certificate_no 다른 경우
+  app <-- fun_svc : 실패 code
+else customer_name or mobile or translated_certificate_no 없는 경우
+  app <-- fun_svc : 실패 code
+end
+
+== 장묘 예약 완료 ==
+sangjo -> fun_svc : 장묘 예약 확정 \n /pcp/funeral/customer/reservation-confirm
+note over sangjo
+{
+  "translated_certificate_no":"증서번호",
+  "uid":"유저식별자",
+  "funeral_date":"장묘날짜",
+  "funeral_plac":"장묘지" 
+}
+end note
+fun_svc -> rb : event
+fun_svc -> db : 상태 update : 2(장묘 확정), 내용 update
+rb -> noti : PASS 푸시 예약 완료
+noti -> app : 푸시
+
+
+== 장묘 예약 수정 ==
+sangjo -> fun_svc : 장묘 수정 \n /pcp/funeral/customer/reservation-update
+note over sangjo
+{
+  "translated_certificate_no":"증서번호",
+  "uid":"유저식별자",
+  "funeral_date":"장묘날짜",
+  "funeral_plac":"장묘지"
+}
+end note
+fun_svc -> rb : event
+fun_svc -> db : 내용 update
+rb -> noti : PASS 푸시 장묘 예약 수정
+noti -> app : 푸시
+
+== 장묘 예약 취소 ==
+sangjo -> fun_svc : 장묘 취소 \n /pcp/funeral/customer/reservation-delete
+note over sangjo
+{
+  "translated_certificate_no":"증서번호",
+  "uid":"유저식별자"
+}
+end note
+fun_svc -> rb : event
+fun_svc -> db : 상태 update : 3(장묘취소)
+rb -> noti : PASS 푸시 장묘 예약 취소
+noti -> app : 푸시
+
+== 장묘 이용 완료 ==
+sangjo -> fun_svc : 장묘 이용 완료 \n /pcp/funeral/customer/funeral-complete
+note over sangjo
+{
+  "translated_certificate_no":"증서번호",
+  "uid":"유저식별자"
+}
+end note
+fun_svc -> rb : event
+fun_svc -> db : 상태 update : 4(장묘서비스완료)
+fun_svc --> sangjo : 장묘 이용 처리 결과 응답
+rb -> noti : PASS 푸시 장묘 서비스 완료
+noti -> app : 푸시
+
+@enduml

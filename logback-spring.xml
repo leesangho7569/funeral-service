@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true" scan="true" scanPeriod="30 seconds">
+    <springProperty scope="context" name="logBase" source="LOG.BASE" default=""/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level [%thread] %logger{1} %L %M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="consoleToFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/funeral.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/%d{yy,aux}/%d{MM,aux}/%d{dd,aux}/lightgwT-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!--fileNamePattern>${LOG_PATH}/%d{yyyy,aux}/lightgwT.%d{yyyy-MM-dd}.%i.log</fileNamePattern-->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- or whenever the file size reaches 200MB -->
+                <maxFileSize>500MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>180</maxHistory>
+        </rollingPolicy>
+        <encoder>
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %thread %logger{26} %L %M %msg%n</pattern>-->
+<!--            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%-14M] %msg%n</pattern> -->
+            <pattern>%d{yy-MM-dd HH:mm:ss.SSS}|%-5p|%15.15(%logger{0}:%L) [%-14M] %msg%n</pattern>
+<!--            <pattern>%d{yy-MM-dd HH:mm:ss.SSS}|%-5p|%-12.12t|%20.20(%logger{0}:%L) [%-14M] %msg%n</pattern> -->
+<!--            <pattern>%d{yy-MM-dd HH:mm:ss.SSS}|%-12.12t|%20.20(%logger{0}:%L) [%-14M] %msg%n</pattern> -->
+<!--            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%-5level] - %msg%n</pattern> -->
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="consoleToFile"/>
+    </root>
+
+</configuration>
+
+<!-- 
+    ERROR
+    WARN
+    INFO
+    DEBUG
+    TRACE
+-->
