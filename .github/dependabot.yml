@@ -1,6 +1,7 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    open-pull-requests-limit: 5 # 동시에 열릴 수 있는 PR 수  
