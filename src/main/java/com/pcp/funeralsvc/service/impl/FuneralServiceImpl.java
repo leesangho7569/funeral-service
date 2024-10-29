@@ -275,7 +275,7 @@ public class FuneralServiceImpl implements FuneralService {
         if(userInfoServiceDtoList == null || userInfoServiceDtoList.isEmpty()){
 
             Response response;
-            Optional<Response> dto = httpClient.sendUserInfo(outboundRequestDto.getTranslatedCertificateNo());
+            Optional<Response> dto = httpClient.sendUserInfo(new UserServiceRequestDto(outboundRequestDto.getTranslatedCertificateNo()));
             response = dto.get();
             if(response.getResponseCode() != ResponseCode.S00000) {
                 msg = String.format(" invalid user-service-응답 = %s", response.getResponseCode());

@@ -1,5 +1,6 @@
 package com.pcp.funeralsvc.web.external;
 
+import com.pcp.funeralsvc.data.dto.request.UserServiceRequestDto;
 import com.pcp.funeralsvc.data.dto.requestToAgent.ReservationRequestDto;
 import com.pcp.funeralsvc.data.dto.response.Response;
 import jakarta.annotation.PostConstruct;
@@ -57,16 +58,16 @@ public class HttpClient {
 
     }
 
-    public Optional<Response> sendUserInfo(String translatedCertificateNo) throws IllegalArgumentException{
+    public Optional<Response> sendUserInfo(UserServiceRequestDto dto) throws IllegalArgumentException{
 
-        if (!isValidTranslatedCertificateNo(translatedCertificateNo)) {
-            throw new IllegalArgumentException("Invalid translatedCertificateNo");
-        }
+//        if (!isValidTranslatedCertificateNo(translatedCertificateNo)) {
+//            throw new IllegalArgumentException("Invalid translatedCertificateNo");
+//        }
 
         URI uri = UriComponentsBuilder
                 .fromUriString(useServiceUrl)
                 .path(userServicePath)
-                .queryParam("translatedCertificateNo", translatedCertificateNo)
+                //.queryParam("translatedCertificateNo", translatedCertificateNo)
                 .encode()
                 .build()
                 .toUri();
@@ -78,12 +79,12 @@ public class HttpClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<?> requestEntity = new HttpEntity<>("", headers);
+        HttpEntity<UserServiceRequestDto> requestEntity = new HttpEntity<>(dto, headers);
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity<Response> responseEntity = restTemplate.exchange(
                 uri,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 requestEntity,
                 Response.class);
 
