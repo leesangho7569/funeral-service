@@ -51,7 +51,7 @@ public class CustomerController {
 
     //장묘 상담 요청(Outbound) /pcp/funeral/v1/customer/funeral/outbound-request
     @RequestMapping(value = "/funeral/outbound-request", method = RequestMethod.POST)
-    public Response outboundRequest(@RequestBody OutboundRequestDto outboundRequestDto, @RequestHeader("X-Uid") Long uid) throws Exception{
+    public Response outboundRequest(@Valid @RequestBody OutboundRequestDto outboundRequestDto, @RequestHeader("X-Uid") Long uid) throws Exception{
 
         if(!funeralService.isUidValid(uid)) return funeralService.unKnownUid(uid, "장묘 상담 요청(Outbound)");
         outboundRequestDto.setUid(uid);

@@ -57,7 +57,11 @@ public class HttpClient {
 
     }
 
-    public Optional<Response> sendUserInfo(String translatedCertificateNo){
+    public Optional<Response> sendUserInfo(String translatedCertificateNo) throws IllegalArgumentException{
+
+        if (!isValidTranslatedCertificateNo(translatedCertificateNo)) {
+            throw new IllegalArgumentException("Invalid translatedCertificateNo");
+        }
 
         URI uri = UriComponentsBuilder
                 .fromUriString(useServiceUrl)
@@ -66,6 +70,10 @@ public class HttpClient {
                 .encode()
                 .build()
                 .toUri();
+
+        if(!uri.toString().contains("/pcp/user/v1/internal")){
+            throw new IllegalArgumentException("Invalid Uri");
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -82,6 +90,10 @@ public class HttpClient {
         Response responseDto = responseEntity.getBody();
 
         return Optional.of(responseDto);
+    }
+
+    private boolean isValidTranslatedCertificateNo(String translatedCertificateNo) {
+        return translatedCertificateNo != null && translatedCertificateNo.matches("^[a-zA-Z0-9]+$");
     }
     public Optional<Response> sendReservationRequest(ReservationRequestDto dto){
 
