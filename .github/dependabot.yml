@@ -4,4 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    open-pull-requests-limit: 5 # 동시에 열릴 수 있는 PR 수  
+      time: "00:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10 # 동시에 열릴 수 있는 PR 수
